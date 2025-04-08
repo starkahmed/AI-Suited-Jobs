@@ -3,7 +3,13 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select } from "@/components/ui/select";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Separator } from "@/components/ui/separator";
 import { Check, Sliders } from "lucide-react";
@@ -142,13 +148,17 @@ const JobFilters = ({ onFilterChange }: JobFiltersProps) => {
         <div>
           <Label htmlFor="experienceLevel">Experience Level</Label>
           <Select
-            id="experienceLevel"
             value={filters.experienceLevel}
             onValueChange={(value) => handleFilterChange("experienceLevel", value)}
           >
-            {experienceLevels.map((level) => (
-              <option key={level} value={level}>{level}</option>
-            ))}
+            <SelectTrigger>
+              <SelectValue placeholder="Select experience level" />
+            </SelectTrigger>
+            <SelectContent>
+              {experienceLevels.map((level) => (
+                <SelectItem key={level} value={level}>{level}</SelectItem>
+              ))}
+            </SelectContent>
           </Select>
         </div>
 
@@ -156,13 +166,17 @@ const JobFilters = ({ onFilterChange }: JobFiltersProps) => {
         <div>
           <Label htmlFor="jobType">Job Type</Label>
           <Select
-            id="jobType"
             value={filters.jobType}
             onValueChange={(value) => handleFilterChange("jobType", value)}
           >
-            {jobTypes.map((type) => (
-              <option key={type} value={type}>{type}</option>
-            ))}
+            <SelectTrigger>
+              <SelectValue placeholder="Select job type" />
+            </SelectTrigger>
+            <SelectContent>
+              {jobTypes.map((type) => (
+                <SelectItem key={type} value={type}>{type}</SelectItem>
+              ))}
+            </SelectContent>
           </Select>
         </div>
 
@@ -276,26 +290,34 @@ const JobFilters = ({ onFilterChange }: JobFiltersProps) => {
               <div>
                 <Label htmlFor="experienceLevel-mobile">Experience Level</Label>
                 <Select
-                  id="experienceLevel-mobile"
                   value={filters.experienceLevel}
                   onValueChange={(value) => handleFilterChange("experienceLevel", value)}
                 >
-                  {experienceLevels.map((level) => (
-                    <option key={level} value={level}>{level}</option>
-                  ))}
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select experience level" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {experienceLevels.map((level) => (
+                      <SelectItem key={level} value={level}>{level}</SelectItem>
+                    ))}
+                  </SelectContent>
                 </Select>
               </div>
 
               <div>
                 <Label htmlFor="jobType-mobile">Job Type</Label>
                 <Select
-                  id="jobType-mobile"
                   value={filters.jobType}
                   onValueChange={(value) => handleFilterChange("jobType", value)}
                 >
-                  {jobTypes.map((type) => (
-                    <option key={type} value={type}>{type}</option>
-                  ))}
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select job type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {jobTypes.map((type) => (
+                      <SelectItem key={type} value={type}>{type}</SelectItem>
+                    ))}
+                  </SelectContent>
                 </Select>
               </div>
 
