@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { BookmarkPlus, BookmarkCheck, Building2, MapPin, Briefcase, DollarSign } from "lucide-react";
+import { BookmarkPlus, BookmarkCheck, Building2, MapPin, Briefcase, DollarSign, Globe } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export interface JobCardProps {
@@ -18,6 +18,7 @@ export interface JobCardProps {
   matchPercentage?: number;
   postedDate: string;
   logoUrl?: string;
+  source?: "LinkedIn" | "Naukri" | "Glassdoor" | string;
   onSave?: (id: string) => void;
   onApply?: (id: string) => void;
 }
@@ -34,11 +35,30 @@ const JobCard = ({
   matchPercentage,
   postedDate,
   logoUrl,
+  source,
   onSave,
   onApply,
 }: JobCardProps) => {
   const [saved, setSaved] = useState(false);
   const { toast } = useToast();
+
+  // Function to get source logo and color
+  const getSourceInfo = (source?: string) => {
+    if (!source) return { color: "bg-gray-100 text-gray-600" };
+    
+    switch(source.toLowerCase()) {
+      case "linkedin":
+        return { color: "bg-blue-100 text-blue-600 border-blue-200" };
+      case "naukri":
+        return { color: "bg-orange-100 text-orange-600 border-orange-200" };
+      case "glassdoor":
+        return { color: "bg-green-100 text-green-600 border-green-200" };
+      default:
+        return { color: "bg-gray-100 text-gray-600" };
+    }
+  };
+
+  const sourceInfo = getSourceInfo(source);
 
   const handleSave = () => {
     setSaved(!saved);
@@ -128,7 +148,16 @@ const JobCard = ({
       </div>
       
       <div className="mt-6 flex justify-between items-center">
-        <span className="text-sm text-gray-500">Posted {postedDate}</span>
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-gray-500">Posted {postedDate}</span>
+          
+          {source && (
+            <Badge variant="outline" className={`flex items-center gap-1 ${sourceInfo.color}`}>
+              <Globe size={12} />
+              {source}
+            </Badge>
+          )}
+        </div>
         
         <div className="flex gap-2">
           <Button 
