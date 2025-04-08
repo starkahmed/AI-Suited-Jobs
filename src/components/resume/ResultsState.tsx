@@ -1,63 +1,46 @@
 
-import { ArrowRight, Lightbulb } from "lucide-react";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import SkillsAnalysis from "@/components/SkillsAnalysis";
-import ImprovementSuggestions from "@/components/resume/ImprovementSuggestions";
-
-interface Skill {
-  name: string;
-  level: number;
-  category: string;
-  suggestions?: string[];
-}
-
-interface ImprovementCategory {
-  category: string;
-  suggestions: string[];
-}
+import { Card } from "@/components/ui/card";
+import { FileCheck, Download, Share2 } from "lucide-react";
 
 interface ResultsStateProps {
-  extractedSkills: Skill[];
-  improvementSuggestions: ImprovementCategory[];
+  onStartOver: () => void;
 }
 
-const ResultsState = ({ extractedSkills, improvementSuggestions }: ResultsStateProps) => {
+const ResultsState = ({ onStartOver }: ResultsStateProps) => {
   return (
-    <div className="space-y-8">
-      <Card className="p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h3 className="text-xl font-semibold">Resume Analysis Results</h3>
-          <Button variant="outline" size="sm">Download Report</Button>
+    <div className="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-sm mb-8">
+      <div className="flex justify-center mb-6">
+        <div className="bg-green-100 p-4 rounded-full">
+          <FileCheck className="text-green-600" size={32} />
         </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <div className="bg-blue-50 p-4 rounded-lg text-center">
-            <p className="text-sm text-gray-500 mb-2">Skills Extracted</p>
-            <p className="text-3xl font-bold text-jobright-blue">{extractedSkills.length}</p>
+      </div>
+      
+      <h2 className="text-2xl font-bold text-center mb-2">Analysis Complete!</h2>
+      <p className="text-gray-600 text-center mb-6">
+        We've analyzed your resume and prepared personalized feedback and improvement suggestions.
+      </p>
+      
+      <div className="flex justify-center gap-4 mb-8">
+        <Button variant="outline" onClick={onStartOver}>
+          Upload Another Resume
+        </Button>
+        <Button className="bg-jobright-blue">
+          <Download className="mr-2 h-4 w-4" /> Download Report
+        </Button>
+      </div>
+      
+      <Card className="p-4 bg-blue-50 border border-blue-100">
+        <div className="flex items-start">
+          <Share2 className="text-jobright-blue mr-3 flex-shrink-0 mt-1" size={20} />
+          <div>
+            <h4 className="font-medium mb-1">Share Your Results</h4>
+            <p className="text-sm text-gray-600">
+              Get additional feedback by sharing your results with career coaches or mentors.
+            </p>
           </div>
-          
-          <div className="bg-purple-50 p-4 rounded-lg text-center">
-            <p className="text-sm text-gray-500 mb-2">Resume Score</p>
-            <p className="text-3xl font-bold text-jobright-purple">72/100</p>
-          </div>
-          
-          <div className="bg-green-50 p-4 rounded-lg text-center">
-            <p className="text-sm text-gray-500 mb-2">Improvement Ideas</p>
-            <p className="text-3xl font-bold text-green-600">8</p>
-          </div>
-        </div>
-        
-        <div className="flex justify-center mt-8">
-          <Button size="lg" className="bg-jobright-blue">
-            Find Matching Jobs <ArrowRight className="ml-2" size={16} />
-          </Button>
         </div>
       </Card>
-      
-      <SkillsAnalysis skills={extractedSkills} />
-      
-      <ImprovementSuggestions suggestions={improvementSuggestions} />
     </div>
   );
 };
