@@ -1,26 +1,64 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import JobFilters from "@/components/JobFilters";
-import { sampleJobs } from "@/data/sampleJobs";
 import JobSearch from "@/components/jobs/JobSearch";
 import JobList from "@/components/jobs/JobList";
 import { filterJobsByQuery, applyJobFilters } from "@/components/jobs/JobFilterUtils";
 import type { JobCardProps } from "@/components/JobCard";
+import { fetchJobs, searchJobs, filterJobs, JobListing } from "@/services/jobService";
+import { useToast } from "@/hooks/use-toast";
 
 const Jobs = () => {
-  const [jobs, setJobs] = useState<JobCardProps[]>(sampleJobs);
+  const [jobs, setJobs] = useState<JobCardProps[]>([]);
+  const [allJobs, setAllJobs] = useState<JobCardProps[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
+  
+  // Fetch jobs on component mount
+  useEffect(() => {
+    const getJobs = async () => {
+      setIsLoading(true);
+      try {
+        const fetchedJobs = await fetchJobs();
+        const mappedJobs = fetchedJobs.map(job => ({
+          ...job,
+          onSave: (id: string) => console.log(`Saved job: ${id}`),
+          onApply: (id: string) => {
+            console.log(`Applied to job: ${id}`);
+            toast({
+              title: "Application submitted",
+              description: "Your application has been submitted successfully.",
+            });
+          },
+          // Add a random match percentage for demo purposes
+          matchPercentage: Math.floor(Math.random() * 50) + 50
+        }));
+        
+        setAllJobs(mappedJobs);
+        setJobs(mappedJobs);
+      } catch (error) {
+        console.error("Error loading jobs:", error);
+        toast({
+          title: "Error loading jobs",
+          description: "Could not load job listings. Please try again later.",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    getJobs();
+  }, [toast]);
   
   const handleFilterChange = (filters: any) => {
     setIsLoading(true);
     
-    // Simulate API call delay
     setTimeout(() => {
-      const filteredJobs = applyJobFilters(sampleJobs, filters);
+      const filteredJobs = filterJobs(allJobs, filters);
       setJobs(filteredJobs);
       setIsLoading(false);
-    }, 800);
+    }, 500);
   };
   
   const handleSearch = (e: React.FormEvent) => {
@@ -28,17 +66,16 @@ const Jobs = () => {
     
     setIsLoading(true);
     
-    // Simulate API call delay
     setTimeout(() => {
-      const filteredJobs = filterJobsByQuery(sampleJobs, searchQuery);
-      setJobs(filteredJobs);
+      const results = searchJobs(allJobs, searchQuery);
+      setJobs(results);
       setIsLoading(false);
-    }, 800);
+    }, 500);
   };
   
   const resetSearch = () => {
     setSearchQuery("");
-    setJobs(sampleJobs);
+    setJobs(allJobs);
   };
   
   return (

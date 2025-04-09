@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -8,7 +8,6 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { Github, Linkedin, Mail } from "lucide-react";
-import { Link } from "react-router-dom";
 
 const Auth = () => {
   const { type } = useParams<{ type: string }>();
@@ -24,6 +23,7 @@ const Auth = () => {
   });
 
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -31,15 +31,53 @@ const Auth = () => {
       ...formData,
       [name]: type === "checkbox" ? checked : value,
     });
+    // Clear error when user starts typing
+    if (error) setError("");
+  };
+
+  const validateForm = () => {
+    if (!formData.email || !formData.email.includes('@')) {
+      setError("Please enter a valid email address");
+      return false;
+    }
+    
+    if (!formData.password || formData.password.length < 6) {
+      setError("Password must be at least 6 characters");
+      return false;
+    }
+    
+    if (!isLogin && !formData.name) {
+      setError("Please enter your name");
+      return false;
+    }
+    
+    return true;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
+    
     setIsLoading(true);
+    setError("");
 
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      // In a real application, this would be an API call to your backend
+      // For this demo, we'll simulate a successful login after a delay
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Store user data in localStorage to maintain session
+      const userData = {
+        id: "user-" + Date.now(),
+        name: formData.name || formData.email.split('@')[0],
+        email: formData.email,
+        isLoggedIn: true
+      };
+      
+      localStorage.setItem("jobright_user", JSON.stringify(userData));
       
       toast({
         title: isLogin ? "Logged in successfully" : "Account created successfully",
@@ -49,23 +87,56 @@ const Auth = () => {
       });
       
       navigate("/dashboard");
-    }, 1500);
+    } catch (err) {
+      setError("Authentication failed. Please try again.");
+      console.error("Authentication error:", err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleSocialAuth = (provider: string) => {
+  const handleSocialAuth = async (provider: string) => {
     setIsLoading(true);
+    setError("");
     
-    // Simulate API call for social auth
-    setTimeout(() => {
+    try {
+      // Simulate Google OAuth flow
+      if (provider === "Google") {
+        // In a real app, we would redirect to Google OAuth here
+        // For demo, we'll simulate a successful authentication
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        const userData = {
+          id: "google-user-" + Date.now(),
+          name: "Google User",
+          email: "googleuser@example.com",
+          isLoggedIn: true,
+          provider: "Google"
+        };
+        
+        localStorage.setItem("jobright_user", JSON.stringify(userData));
+        
+        toast({
+          title: `${provider} authentication successful`,
+          description: "You are now logged in with " + provider,
+        });
+        
+        navigate("/dashboard");
+      } else {
+        // For other providers, just show a toast that it's not implemented yet
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        toast({
+          title: "Coming soon",
+          description: `${provider} login will be available soon!`,
+        });
+      }
+    } catch (err) {
+      setError(`${provider} authentication failed. Please try again.`);
+      console.error("Social authentication error:", err);
+    } finally {
       setIsLoading(false);
-      
-      toast({
-        title: `${provider} authentication successful`,
-        description: "You are now logged in with " + provider,
-      });
-      
-      navigate("/dashboard");
-    }, 1500);
+    }
   };
 
   return (
@@ -83,6 +154,12 @@ const Auth = () => {
         </div>
 
         <Card className="p-6">
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4 text-sm">
+              {error}
+            </div>
+          )}
+          
           <div className="space-y-4 mb-6">
             <Button 
               variant="outline" 
