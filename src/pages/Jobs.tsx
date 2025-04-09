@@ -7,6 +7,15 @@ import { filterJobsByQuery, applyJobFilters } from "@/components/jobs/JobFilterU
 import type { JobCardProps } from "@/components/JobCard";
 import { fetchJobs, searchJobs, filterJobs, JobListing } from "@/services/jobService";
 import { useToast } from "@/hooks/use-toast";
+import { 
+  Pagination, 
+  PaginationContent, 
+  PaginationEllipsis, 
+  PaginationItem, 
+  PaginationLink, 
+  PaginationNext, 
+  PaginationPrevious 
+} from "@/components/ui/pagination";
 
 const Jobs = () => {
   const [jobs, setJobs] = useState<JobCardProps[]>([]);
@@ -14,6 +23,10 @@ const Jobs = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const jobsPerPage = 5; // Number of jobs to display per page
   
   // Fetch jobs on component mount
   useEffect(() => {
@@ -57,6 +70,7 @@ const Jobs = () => {
     setTimeout(() => {
       const filteredJobs = filterJobs(allJobs, filters);
       setJobs(filteredJobs);
+      setCurrentPage(1); // Reset to first page when filters change
       setIsLoading(false);
     }, 500);
   };
@@ -69,6 +83,7 @@ const Jobs = () => {
     setTimeout(() => {
       const results = searchJobs(allJobs, searchQuery);
       setJobs(results);
+      setCurrentPage(1); // Reset to first page when search changes
       setIsLoading(false);
     }, 500);
   };
@@ -76,6 +91,104 @@ const Jobs = () => {
   const resetSearch = () => {
     setSearchQuery("");
     setJobs(allJobs);
+    setCurrentPage(1); // Reset to first page when search is reset
+  };
+  
+  // Get current jobs for pagination
+  const indexOfLastJob = currentPage * jobsPerPage;
+  const indexOfFirstJob = indexOfLastJob - jobsPerPage;
+  const currentJobs = jobs.slice(indexOfFirstJob, indexOfLastJob);
+  const totalPages = Math.ceil(jobs.length / jobsPerPage);
+  
+  // Generate page numbers for pagination
+  const generatePaginationItems = () => {
+    let items = [];
+    
+    // Always show first page
+    items.push(
+      <PaginationItem key="first">
+        <PaginationLink 
+          onClick={() => setCurrentPage(1)} 
+          isActive={currentPage === 1}
+        >
+          1
+        </PaginationLink>
+      </PaginationItem>
+    );
+    
+    // If there are many pages, show ellipsis after first page
+    if (currentPage > 3) {
+      items.push(
+        <PaginationItem key="ellipsis1">
+          <PaginationEllipsis />
+        </PaginationItem>
+      );
+    }
+    
+    // Show current page - 1 if it's not first page or right after first page
+    if (currentPage > 2) {
+      items.push(
+        <PaginationItem key={currentPage - 1}>
+          <PaginationLink 
+            onClick={() => setCurrentPage(currentPage - 1)}
+          >
+            {currentPage - 1}
+          </PaginationLink>
+        </PaginationItem>
+      );
+    }
+    
+    // Show current page if it's not first page
+    if (currentPage !== 1 && currentPage !== totalPages) {
+      items.push(
+        <PaginationItem key={currentPage}>
+          <PaginationLink 
+            onClick={() => setCurrentPage(currentPage)} 
+            isActive={true}
+          >
+            {currentPage}
+          </PaginationLink>
+        </PaginationItem>
+      );
+    }
+    
+    // Show current page + 1 if it's not last page or right before last page
+    if (currentPage < totalPages - 1) {
+      items.push(
+        <PaginationItem key={currentPage + 1}>
+          <PaginationLink 
+            onClick={() => setCurrentPage(currentPage + 1)}
+          >
+            {currentPage + 1}
+          </PaginationLink>
+        </PaginationItem>
+      );
+    }
+    
+    // If there are many pages, show ellipsis before last page
+    if (currentPage < totalPages - 2) {
+      items.push(
+        <PaginationItem key="ellipsis2">
+          <PaginationEllipsis />
+        </PaginationItem>
+      );
+    }
+    
+    // Always show last page if there's more than one page
+    if (totalPages > 1) {
+      items.push(
+        <PaginationItem key="last">
+          <PaginationLink 
+            onClick={() => setCurrentPage(totalPages)} 
+            isActive={currentPage === totalPages}
+          >
+            {totalPages}
+          </PaginationLink>
+        </PaginationItem>
+      );
+    }
+    
+    return items;
   };
   
   return (
@@ -101,11 +214,40 @@ const Jobs = () => {
         </div>
         
         {/* Job Results */}
-        <JobList 
-          jobs={jobs}
-          isLoading={isLoading}
-          resetSearch={resetSearch}
-        />
+        <div className="flex-grow flex flex-col">
+          <JobList 
+            jobs={currentJobs}
+            isLoading={isLoading}
+            resetSearch={resetSearch}
+          />
+          
+          {/* Pagination */}
+          {!isLoading && jobs.length > 0 && (
+            <div className="mt-6">
+              <Pagination>
+                <PaginationContent>
+                  {currentPage > 1 && (
+                    <PaginationItem>
+                      <PaginationPrevious 
+                        onClick={() => setCurrentPage(currentPage - 1)} 
+                      />
+                    </PaginationItem>
+                  )}
+                  
+                  {generatePaginationItems()}
+                  
+                  {currentPage < totalPages && (
+                    <PaginationItem>
+                      <PaginationNext 
+                        onClick={() => setCurrentPage(currentPage + 1)} 
+                      />
+                    </PaginationItem>
+                  )}
+                </PaginationContent>
+              </Pagination>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
