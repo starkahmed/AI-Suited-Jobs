@@ -10,6 +10,7 @@ import Footer from "./components/Footer";
 import Home from "./pages/Home";
 import Jobs from "./pages/Jobs";
 import Dashboard from "./pages/Dashboard";
+import SavedJobs from "./pages/SavedJobs";
 import ResumeAnalyzer from "./pages/ResumeAnalyzer";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
@@ -45,6 +46,11 @@ const App = () => (
             <Route path="/" element={<Home />} />
             <Route path="/jobs" element={<Jobs />} />
             <Route path="/resume" element={<ResumeAnalyzer />} />
+            <Route path="/saved-jobs" element={
+              <ProtectedRoute>
+                <SavedJobs />
+              </ProtectedRoute>
+            } />
             <Route path="/dashboard" element={
               <ProtectedRoute>
                 <Dashboard />

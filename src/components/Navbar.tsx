@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
-import { Menu, X, User, LogOut } from "lucide-react";
+import { Menu, X, User, LogOut, Bookmark } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -65,9 +65,11 @@ const Navbar = () => {
           <Link to="/resume" className="text-gray-700 hover:text-jobright-blue transition-colors">
             AI Resume
           </Link>
-          <Link to="/about" className="text-gray-700 hover:text-jobright-blue transition-colors">
-            About
-          </Link>
+          {user && (
+            <Link to="/saved-jobs" className="text-gray-700 hover:text-jobright-blue transition-colors flex items-center">
+              <Bookmark size={16} className="mr-1" /> Saved Jobs
+            </Link>
+          )}
         </nav>
 
         {/* Auth Buttons or User Menu */}
@@ -83,6 +85,10 @@ const Navbar = () => {
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={() => navigate("/dashboard")}>
                   Dashboard
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/saved-jobs")}>
+                  <Bookmark className="mr-2 h-4 w-4" />
+                  <span>Saved Jobs</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate("/profile")}>
                   My Profile
@@ -136,13 +142,15 @@ const Navbar = () => {
             >
               AI Resume
             </Link>
-            <Link 
-              to="/about" 
-              className="text-gray-700 hover:text-jobright-blue transition-colors py-2"
-              onClick={() => setMenuOpen(false)}
-            >
-              About
-            </Link>
+            {user && (
+              <Link 
+                to="/saved-jobs" 
+                className="text-gray-700 hover:text-jobright-blue transition-colors py-2 flex items-center"
+                onClick={() => setMenuOpen(false)}
+              >
+                <Bookmark size={16} className="mr-2" /> Saved Jobs
+              </Link>
+            )}
             
             <div className="flex flex-col space-y-2 pt-4 border-t">
               {user ? (
@@ -151,6 +159,12 @@ const Navbar = () => {
                     <Link to="/dashboard">
                       <User className="mr-2 h-4 w-4" />
                       Dashboard
+                    </Link>
+                  </Button>
+                  <Button variant="outline" asChild className="justify-start" onClick={() => setMenuOpen(false)}>
+                    <Link to="/saved-jobs">
+                      <Bookmark className="mr-2 h-4 w-4" />
+                      Saved Jobs
                     </Link>
                   </Button>
                   <Button variant="outline" className="justify-start text-red-500" onClick={() => {

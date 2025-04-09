@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -42,6 +42,20 @@ const JobCard = ({
   const [saved, setSaved] = useState(false);
   const { toast } = useToast();
 
+  // Check if job is already saved
+  useEffect(() => {
+    const savedJobsData = localStorage.getItem("jobright_saved_jobs");
+    if (savedJobsData) {
+      try {
+        const savedJobs = JSON.parse(savedJobsData);
+        const isJobSaved = savedJobs.some((job: JobCardProps) => job.id === id);
+        setSaved(isJobSaved);
+      } catch (error) {
+        console.error("Error checking saved job status:", error);
+      }
+    }
+  }, [id]);
+
   // Function to get source logo and color
   const getSourceInfo = (source?: string) => {
     if (!source) return { color: "bg-gray-100 text-gray-600" };
@@ -61,12 +75,53 @@ const JobCard = ({
   const sourceInfo = getSourceInfo(source);
 
   const handleSave = () => {
-    setSaved(!saved);
+    const newSavedState = !saved;
+    setSaved(newSavedState);
+    
+    // Update localStorage
+    const savedJobsData = localStorage.getItem("jobright_saved_jobs");
+    let savedJobs: JobCardProps[] = [];
+    
+    if (savedJobsData) {
+      try {
+        savedJobs = JSON.parse(savedJobsData);
+      } catch (error) {
+        console.error("Error parsing saved jobs:", error);
+      }
+    }
+    
+    if (newSavedState) {
+      // Add job to saved jobs if not already there
+      if (!savedJobs.some(job => job.id === id)) {
+        const jobToSave = {
+          id,
+          title,
+          company,
+          location,
+          salary,
+          experience,
+          skills,
+          description,
+          matchPercentage,
+          postedDate,
+          logoUrl,
+          source
+        };
+        
+        savedJobs.push(jobToSave);
+      }
+    } else {
+      // Remove job from saved jobs
+      savedJobs = savedJobs.filter(job => job.id !== id);
+    }
+    
+    localStorage.setItem("jobright_saved_jobs", JSON.stringify(savedJobs));
+    
     if (onSave) onSave(id);
     
     toast({
-      title: saved ? "Removed from saved jobs" : "Job saved successfully",
-      description: saved ? "This job has been removed from your saved list" : "This job has been added to your saved jobs",
+      title: newSavedState ? "Job saved successfully" : "Removed from saved jobs",
+      description: newSavedState ? "This job has been added to your saved jobs" : "This job has been removed from your saved list",
       duration: 3000,
     });
   };
