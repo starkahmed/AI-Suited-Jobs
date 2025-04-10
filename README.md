@@ -1,73 +1,116 @@
-# Welcome to your Lovable project
+# README.md
 
-## Project info
+# AI-Suited-Jobs
 
-**URL**: https://lovable.dev/projects/2ff181c2-e21f-4958-a2c0-3b9e7d0a3bab
+An AI-powered job-matching platform that analyzes resumes and finds suitable jobs based on skills, experience, and preferences.
 
-## How can I edit this code?
+---
 
-There are several ways of editing your application.
+## 🌐 Live Project
+**Frontend**: https://ai-suited-jobs.vercel.app  
+**Backend**: Coming soon (FastAPI + REST API)
 
-**Use Lovable**
+---
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/2ff181c2-e21f-4958-a2c0-3b9e7d0a3bab) and start prompting.
+## 📁 Tech Stack
 
-Changes made via Lovable will be committed automatically to this repo.
+### Frontend:
+- React (w/ TypeScript)
+- Vite
+- Tailwind CSS
+- ShadCN UI
+- React Router
+- React Query
 
-**Use your preferred IDE**
+### Backend:
+- FastAPI (Python)
+- spaCy (For resume parsing)
+- Pydantic (Data validation)
+- Uvicorn (ASGI server)
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+---
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## 🧩 Project Structure
 
-Follow these steps:
+### Frontend (inside `/frontend`):
+```
+frontend/
+├── src/
+│   ├── components/
+│   ├── pages/
+│   ├── hooks/
+│   ├── lib/
+│   ├── App.tsx
+│   └── main.tsx
+├── public/
+├── index.html
+└── vite.config.ts
+```
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+### Backend (inside `/backend`):
+```
+backend/
+├── app/
+│   ├── api/
+│   │   └── v1/
+│   │       └── api_router.py
+│   ├── core/
+│   │   └── config.py
+│   ├── models/
+│   │   └── job.py
+│   ├── schemas/
+│   │   └── job.py
+│   ├── services/
+│   │   └── job_matcher.py
+│   └── main.py
+├── requirements.txt
+└── README.md
+```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+---
 
-# Step 3: Install the necessary dependencies.
-npm i
+## 🚀 Getting Started
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+### Frontend:
+```bash
+cd frontend
+npm install
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+### Backend:
+```bash
+cd backend
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload
+```
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+---
 
-**Use GitHub Codespaces**
+## 🔮 Phase-wise Roadmap
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### ✅ Phase 1 (MVP)
+- [x] Frontend basic UI
+- [x] Resume upload + parsing endpoint
+- [x] Job matching engine (basic)
+- [x] Save jobs API (mocked)
+- [x] Dashboard & Saved jobs UI
 
-## What technologies are used for this project?
+### 🔜 Phase 2
+- [ ] Filters (location, salary, experience)
+- [ ] Favorites system
+- [ ] MongoDB/PostgreSQL integration
 
-This project is built with:
+### 🔮 Future Plans
+- [ ] Auto-apply feature
+- [ ] LinkedIn/Naukri scraping
+- [ ] Email notifications
+- [ ] User profile system
+- [ ] Admin panel
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+---
 
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/2ff181c2-e21f-4958-a2c0-3b9e7d0a3bab) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes it is!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+## ✨ Credits
+This project was initially scaffolded using **Lovable.dev** and enhanced manually by Ahmedraza Shaikh.
