@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { Facebook, Instagram, Linkedin, Twitter } from "lucide-react";
 
@@ -9,7 +8,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
             <Link to="/" className="text-2xl font-bold">
-              <span className="gradient-text">JobRight</span>
+              <span className="gradient-text">SuitedJobs</span>
             </Link>
             <p className="mt-4 text-gray-600">
               AI-powered job matching platform that helps you find the right job based on your resume and skills.
@@ -101,7 +100,7 @@ const Footer = () => {
           </div>
         </div>
         <div className="border-t border-gray-200 mt-12 pt-8 text-center text-gray-500">
-          <p>© {new Date().getFullYear()} JobRight AI. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} SuitedJobs AI. All rights reserved.</p>
         </div>
       </div>
     </footer>

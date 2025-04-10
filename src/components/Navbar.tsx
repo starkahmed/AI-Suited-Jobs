@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
@@ -17,7 +16,6 @@ const Navbar = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Check if user is logged in on component mount
   useEffect(() => {
     const userData = localStorage.getItem("jobright_user");
     if (userData) {
@@ -50,11 +48,10 @@ const Navbar = () => {
       <div className="container max-w-7xl mx-auto flex justify-between items-center">
         <div className="flex items-center">
           <Link to="/" className="text-2xl font-bold text-jobright-blue">
-            <span className="gradient-text">JobRight</span>
+            <span className="gradient-text">SuitedJobs</span>
           </Link>
         </div>
 
-        {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-8">
           <Link to="/" className="text-gray-700 hover:text-jobright-blue transition-colors">
             Home
@@ -72,7 +69,6 @@ const Navbar = () => {
           )}
         </nav>
 
-        {/* Auth Buttons or User Menu */}
         <div className="hidden md:flex items-center space-x-4">
           {user ? (
             <DropdownMenu>
@@ -111,13 +107,11 @@ const Navbar = () => {
           )}
         </div>
 
-        {/* Mobile Menu Button */}
         <button className="md:hidden" onClick={toggleMenu}>
           {menuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
       </div>
 
-      {/* Mobile Menu */}
       {menuOpen && (
         <div className="md:hidden absolute top-16 left-0 right-0 bg-white border-b shadow-lg animate-fade-in">
           <div className="container mx-auto py-4 px-4 flex flex-col space-y-4">
