@@ -4,10 +4,11 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { FileUp, FileText, CheckCircle, AlertCircle, Loader2, Upload } from "lucide-react";
+import { FileUp, FileText, CheckCircle, AlertCircle, Loader2, Upload, XCircle } from "lucide-react";
+import { parseResume, ParsedResume } from "@/services/resumeParserService"; 
 
 interface ResumeUploaderProps {
-  onUploadSuccess?: (file: File) => void;
+  onUploadSuccess?: (file: File, parsedData: ParsedResume) => void;
   onUploadError?: (error: string) => void;
 }
 
@@ -15,7 +16,8 @@ const ResumeUploader = ({ onUploadSuccess, onUploadError }: ResumeUploaderProps)
   const [file, setFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [uploadStatus, setUploadStatus] = useState<"idle" | "uploading" | "success" | "error">("idle");
+  const [uploadStatus, setUploadStatus] = useState<"idle" | "uploading" | "parsing" | "success" | "error">("idle");
+  const [errorMessage, setErrorMessage] = useState<string>("");
   const { toast } = useToast();
 
   const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
@@ -35,14 +37,16 @@ const ResumeUploader = ({ onUploadSuccess, onUploadError }: ResumeUploaderProps)
     e.stopPropagation();
     setIsDragging(false);
     
-    if (uploadStatus === "uploading") return;
+    if (uploadStatus === "uploading" || uploadStatus === "parsing") return;
     
     const files = e.dataTransfer.files;
-    processFile(files[0]);
+    if (files.length > 0) {
+      processFile(files[0]);
+    }
   }, [uploadStatus]);
 
   const handleFileInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    if (uploadStatus === "uploading") return;
+    if (uploadStatus === "uploading" || uploadStatus === "parsing") return;
     
     const files = e.target.files;
     if (files && files.length > 0) {
@@ -51,59 +55,64 @@ const ResumeUploader = ({ onUploadSuccess, onUploadError }: ResumeUploaderProps)
   }, [uploadStatus]);
 
   const processFile = (file: File) => {
-    if (!validateFile(file)) {
-      toast({
-        title: "Invalid file",
-        description: "Please upload a PDF, DOCX, or TXT file (max 5MB)",
-        variant: "destructive",
-      });
-      
-      if (onUploadError) onUploadError("Invalid file format or size");
-      return;
-    }
-
     setFile(file);
-    simulateUpload(file);
-  };
-
-  const validateFile = (file: File): boolean => {
-    const validTypes = ["application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "text/plain"];
-    const maxSize = 5 * 1024 * 1024; // 5MB
-    
-    return validTypes.includes(file.type) && file.size <= maxSize;
-  };
-
-  const simulateUpload = (file: File) => {
     setUploadStatus("uploading");
     setUploadProgress(0);
+    setErrorMessage("");
     
+    // Simulate upload progress
     const interval = setInterval(() => {
       setUploadProgress(prev => {
         if (prev >= 100) {
           clearInterval(interval);
-          setUploadStatus("success");
-          
-          // Simulate backend processing
-          setTimeout(() => {
-            toast({
-              title: "Resume uploaded successfully",
-              description: "We're analyzing your resume...",
-            });
-            
-            if (onUploadSuccess) onUploadSuccess(file);
-          }, 500);
-          
+          parseResumeFile(file);
           return 100;
         }
-        return prev + 10;
+        return prev + 5;
       });
-    }, 200);
+    }, 50);
+  };
+
+  const parseResumeFile = async (file: File) => {
+    setUploadStatus("parsing");
+    
+    try {
+      const parsedData = await parseResume(file);
+      
+      // Set success state
+      setUploadStatus("success");
+      
+      // Notify parent component
+      if (onUploadSuccess) {
+        onUploadSuccess(file, parsedData);
+      }
+      
+      toast({
+        title: "Resume parsed successfully",
+        description: `We've extracted ${parsedData.skills.length} skills from your resume.`,
+      });
+      
+    } catch (error) {
+      setUploadStatus("error");
+      let message = "Failed to parse resume";
+      
+      if (error instanceof Error) {
+        message = error.message;
+      }
+      
+      setErrorMessage(message);
+      
+      if (onUploadError) {
+        onUploadError(message);
+      }
+    }
   };
 
   const resetUpload = () => {
     setFile(null);
     setUploadProgress(0);
     setUploadStatus("idle");
+    setErrorMessage("");
   };
 
   return (
@@ -114,7 +123,7 @@ const ResumeUploader = ({ onUploadSuccess, onUploadError }: ResumeUploaderProps)
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         onClick={() => {
-          if (uploadStatus !== "uploading" && !file) {
+          if (uploadStatus !== "uploading" && uploadStatus !== "parsing" && !file) {
             document.getElementById("resume-upload")?.click();
           }
         }}
@@ -129,7 +138,7 @@ const ResumeUploader = ({ onUploadSuccess, onUploadError }: ResumeUploaderProps)
               Drag and drop your resume file here, or click to browse
             </p>
             <p className="text-sm text-gray-400 mb-4">
-              Supported formats: PDF, DOCX, TXT (max 5MB)
+              Supported formats: PDF, DOCX (max 5MB)
             </p>
             <Button variant="outline" className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200 text-jobright-blue">
               Select File
@@ -138,7 +147,7 @@ const ResumeUploader = ({ onUploadSuccess, onUploadError }: ResumeUploaderProps)
               type="file"
               id="resume-upload"
               className="hidden"
-              accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
+              accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
               onChange={handleFileInput}
             />
           </>
@@ -161,18 +170,45 @@ const ResumeUploader = ({ onUploadSuccess, onUploadError }: ResumeUploaderProps)
             </div>
           </div>
         )}
+        
+        {uploadStatus === "parsing" && (
+          <div className="text-center animate-fade-in">
+            <div className="mb-4">
+              <Loader2 size={40} className="animate-spin mx-auto text-jobright-blue" />
+            </div>
+            <h3 className="font-semibold text-xl mb-2">Analyzing Your Resume</h3>
+            <p className="text-gray-500 mb-4">
+              Our AI is extracting skills from your resume...
+            </p>
+            <div className="flex flex-wrap justify-center gap-2 mb-4">
+              <div className="px-3 py-1 bg-gray-100 rounded-full animate-pulse">
+                <span className="text-xs text-gray-500">JavaScript</span>
+              </div>
+              <div className="px-3 py-1 bg-gray-100 rounded-full animate-pulse delay-75">
+                <span className="text-xs text-gray-500">React</span>
+              </div>
+              <div className="px-3 py-1 bg-gray-100 rounded-full animate-pulse delay-150">
+                <span className="text-xs text-gray-500">TypeScript</span>
+              </div>
+              <div className="px-3 py-1 bg-gray-100 rounded-full animate-pulse delay-300">
+                <span className="text-xs text-gray-500">UX Design</span>
+              </div>
+            </div>
+            <p className="text-sm text-gray-400">This may take a moment...</p>
+          </div>
+        )}
 
         {uploadStatus === "success" && (
           <div className="text-center animate-fade-in">
             <div className="bg-green-50 p-4 rounded-full mb-4 mx-auto w-fit">
               <CheckCircle size={36} className="text-green-500" />
             </div>
-            <h3 className="font-semibold text-lg mb-2">Upload Complete!</h3>
+            <h3 className="font-semibold text-lg mb-2">Analysis Complete!</h3>
             <p className="text-gray-500 mb-4 truncate max-w-[250px] mx-auto">
               {file?.name}
             </p>
             <p className="text-sm text-gray-500 mb-4">
-              Our AI is analyzing your resume...
+              Skills extracted successfully. View your results below.
             </p>
             <Button 
               variant="outline" 
@@ -190,11 +226,11 @@ const ResumeUploader = ({ onUploadSuccess, onUploadError }: ResumeUploaderProps)
         {uploadStatus === "error" && (
           <div className="text-center animate-fade-in">
             <div className="bg-red-50 p-4 rounded-full mb-4 mx-auto w-fit">
-              <AlertCircle size={36} className="text-red-500" />
+              <XCircle size={36} className="text-red-500" />
             </div>
             <h3 className="font-semibold text-lg mb-2">Upload Failed</h3>
             <p className="text-gray-500 mb-4">
-              There was a problem uploading your file.
+              {errorMessage || "There was a problem analyzing your resume."}
             </p>
             <Button 
               onClick={(e) => {

@@ -8,7 +8,6 @@ import ImprovementSuggestions from "@/components/resume/ImprovementSuggestions";
 import ResumeMatchScore from "@/components/resume/ResumeMatchScore";
 import KeywordMatches from "@/components/resume/KeywordMatches";
 import { 
-  extractedSkills, 
   improvementSuggestions, 
   resumeMatchScore,
   keywordMatches 
@@ -17,26 +16,30 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Upload, BrainCircuit, FileSearch, BriefcaseBusiness } from "lucide-react";
+import { ParsedResume } from "@/services/resumeParserService";
 
 type AnalysisState = "idle" | "analyzing" | "results";
 
 const ResumeAnalyzer = () => {
   const [analysisState, setAnalysisState] = useState<AnalysisState>("idle");
   const [resumeFile, setResumeFile] = useState<File | null>(null);
+  const [parsedResume, setParsedResume] = useState<ParsedResume | null>(null);
   
-  const handleUploadSuccess = (file: File) => {
+  const handleUploadSuccess = (file: File, parsedData: ParsedResume) => {
     setResumeFile(file);
+    setParsedResume(parsedData);
     setAnalysisState("analyzing");
     
     // Simulate analysis delay
     setTimeout(() => {
       setAnalysisState("results");
-    }, 3000);
+    }, 1500);
   };
   
   const handleStartOver = () => {
     setAnalysisState("idle");
     setResumeFile(null);
+    setParsedResume(null);
   };
   
   return (
@@ -105,7 +108,6 @@ const ResumeAnalyzer = () => {
               <div className="flex flex-wrap gap-2">
                 <Badge variant="secondary">PDF</Badge>
                 <Badge variant="secondary">DOCX</Badge>
-                <Badge variant="secondary">TXT</Badge>
               </div>
               <p className="mt-4 text-sm text-gray-600">
                 For best results, ensure your resume includes relevant skills, experience, and job titles.
@@ -119,7 +121,7 @@ const ResumeAnalyzer = () => {
         <AnalyzingState fileName={resumeFile?.name || "resume.pdf"} />
       )}
       
-      {analysisState === "results" && (
+      {analysisState === "results" && parsedResume && (
         <div className="animate-fade-in">
           <div className="mb-6">
             <Button variant="outline" size="sm" onClick={handleStartOver}>
@@ -137,8 +139,8 @@ const ResumeAnalyzer = () => {
           <Card className="mb-8 p-6 border-2 border-dashed border-blue-200 bg-blue-50/20">
             <h2 className="text-lg font-semibold mb-4">Your Skills</h2>
             <div className="flex flex-wrap gap-2 mb-6">
-              {extractedSkills.slice(0, 8).map((skill) => (
-                <Badge key={skill.name} className="bg-white text-jobright-blue border border-blue-200">
+              {parsedResume.skills.map((skill, index) => (
+                <Badge key={index} className="bg-white text-jobright-blue border border-blue-200">
                   {skill.name}
                 </Badge>
               ))}
@@ -164,7 +166,7 @@ const ResumeAnalyzer = () => {
             </div>
             <div>
               <SkillsAnalysis 
-                skills={extractedSkills} 
+                skills={parsedResume.skills}
                 onSkillAdd={(skill) => console.log("Added skill:", skill)}
                 onSkillRemove={(skill) => console.log("Removed skill:", skill)}
               />
