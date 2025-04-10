@@ -4,7 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { FileUp, FileText, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
+import { FileUp, FileText, CheckCircle, AlertCircle, Loader2, Upload } from "lucide-react";
 
 interface ResumeUploaderProps {
   onUploadSuccess?: (file: File) => void;
@@ -107,9 +107,9 @@ const ResumeUploader = ({ onUploadSuccess, onUploadError }: ResumeUploaderProps)
   };
 
   return (
-    <Card className={`p-6 ${isDragging ? "border-dashed border-2 border-jobright-blue bg-blue-50/50" : ""}`}>
+    <Card className={`p-6 transition-all duration-300 ${isDragging ? "border-dashed border-2 border-jobright-blue bg-blue-50/50 shadow-md transform -translate-y-1" : "hover:shadow-md"}`}>
       <div
-        className="flex flex-col items-center justify-center min-h-[250px] cursor-pointer"
+        className="flex flex-col items-center justify-center min-h-[250px] cursor-pointer rounded-lg"
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
@@ -121,16 +121,19 @@ const ResumeUploader = ({ onUploadSuccess, onUploadError }: ResumeUploaderProps)
       >
         {uploadStatus === "idle" && !file && (
           <>
-            <div className="bg-blue-50 p-4 rounded-full mb-4">
-              <FileUp size={36} className="text-jobright-blue" />
+            <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-5 rounded-full mb-5 animate-pulse">
+              <Upload size={40} className="text-jobright-blue" />
             </div>
-            <h3 className="font-semibold text-lg mb-2">Upload Your Resume</h3>
+            <h3 className="font-semibold text-xl mb-3">Upload Your Resume</h3>
             <p className="text-gray-500 text-center mb-4 max-w-sm">
               Drag and drop your resume file here, or click to browse
             </p>
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-gray-400 mb-4">
               Supported formats: PDF, DOCX, TXT (max 5MB)
             </p>
+            <Button variant="outline" className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200 text-jobright-blue">
+              Select File
+            </Button>
             <input
               type="file"
               id="resume-upload"
@@ -142,14 +145,14 @@ const ResumeUploader = ({ onUploadSuccess, onUploadError }: ResumeUploaderProps)
         )}
 
         {uploadStatus === "uploading" && (
-          <div className="w-full max-w-sm">
+          <div className="w-full max-w-sm animate-fade-in">
             <div className="flex items-center mb-4">
               <Loader2 className="animate-spin mr-2 text-jobright-blue" size={20} />
               <span className="font-medium">Uploading resume...</span>
             </div>
-            <Progress value={uploadProgress} className="h-2" />
+            <Progress value={uploadProgress} className="h-2 bg-gray-100" />
             <div className="flex justify-between mt-2">
-              <span className="text-sm text-gray-500">
+              <span className="text-sm text-gray-500 truncate max-w-[200px]">
                 {file?.name}
               </span>
               <span className="text-sm font-medium">
@@ -160,13 +163,16 @@ const ResumeUploader = ({ onUploadSuccess, onUploadError }: ResumeUploaderProps)
         )}
 
         {uploadStatus === "success" && (
-          <div className="text-center">
+          <div className="text-center animate-fade-in">
             <div className="bg-green-50 p-4 rounded-full mb-4 mx-auto w-fit">
               <CheckCircle size={36} className="text-green-500" />
             </div>
             <h3 className="font-semibold text-lg mb-2">Upload Complete!</h3>
-            <p className="text-gray-500 mb-4">
+            <p className="text-gray-500 mb-4 truncate max-w-[250px] mx-auto">
               {file?.name}
+            </p>
+            <p className="text-sm text-gray-500 mb-4">
+              Our AI is analyzing your resume...
             </p>
             <Button 
               variant="outline" 
@@ -182,7 +188,7 @@ const ResumeUploader = ({ onUploadSuccess, onUploadError }: ResumeUploaderProps)
         )}
 
         {uploadStatus === "error" && (
-          <div className="text-center">
+          <div className="text-center animate-fade-in">
             <div className="bg-red-50 p-4 rounded-full mb-4 mx-auto w-fit">
               <AlertCircle size={36} className="text-red-500" />
             </div>
@@ -195,6 +201,7 @@ const ResumeUploader = ({ onUploadSuccess, onUploadError }: ResumeUploaderProps)
                 e.stopPropagation();
                 resetUpload();
               }}
+              className="bg-gradient-to-r from-jobright-blue to-jobright-purple"
             >
               Try Again
             </Button>

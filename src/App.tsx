@@ -24,7 +24,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   
   useEffect(() => {
     // Check if user is logged in
-    const userData = localStorage.getItem("jobright_user");
+    const userData = localStorage.getItem("aisuitedjobs_user");
     setIsLoggedIn(!!userData);
     setIsLoading(false);
   }, []);
@@ -33,6 +33,9 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   
   return isLoggedIn ? <>{children}</> : <Navigate to="/login" />;
 };
+
+// Document title
+document.title = "AI-Suited-Jobs | Find Your Perfect Match";
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
